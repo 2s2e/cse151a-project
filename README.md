@@ -6,7 +6,7 @@ The purpose of our machine learning application is to allow the user to create v
 
 ## Data: 
 
-Our dataset consists of a list of 17841 unique songs that were pulled from Spotify and YouTube. It contains labeling data such as the album, the artist, the rank, the name of the track, etc., and data on the song itself like key, instrumentalness, danceability, energy, acoustics, etc. Each row contains 26 features.
+Our dataset consists of a list of 17841 unique songs that were pulled from Spotify and YouTube. It contains labeling data such as the album, the artist, the rank, the name of the track, etc., and data on the song itself like key, instrumentalness, danceability, energy, acoustics, etc. Each row contains 26 features.  It can be found [here](https://github.com/2s2e/cse151a-project/blob/main/Spotify_Youtube.csv).
 
 
 ## Preprocessing:
