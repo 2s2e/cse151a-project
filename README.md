@@ -18,6 +18,7 @@ Strings, such as artist name and album name were encoded based on the total numb
 ## Train your first model
 
 For our first model we tested out one of the most popular unsupervised learning techniques – K Means Clustering. To identify the number of clusters in the model we used the silhouette score metric. 
+Our first model can be found under the clustering section (below data preprocessing) [here](https://github.com/2s2e/cse151a-project/blob/main/Milestone%203.ipynb).
 
 The following is how K means clustering works:
 Centroid for each of the clusters are uniformly initialized
@@ -53,18 +54,6 @@ We want to ensure that this recommendation system can put forward recommendation
 
 Here are some improvements on the model we have found to be reasonable:
 
-Dynamic clustering algorithms like DBSCAN, this has the potential to recommend a more natural groupings of songs
-Develop a mechanism for users to give feedback to rate their recommendations, and this should allow the model to refine its predictions over time and be adaptive to the current musical taste of the user population
-Incorporate more features, and try encoding schemas beyond frequency encoding
-## Random links:
-
-This seems like a nice and simple link for first steps – Music Recommendation System Using Machine Learning
-https://www.geeksforgeeks.org/music-recommendation-system-using-machine-learning/
-
-K-means clustering guide: https://www.analyticsvidhya.com/blog/2019/08/comprehensive-guide-k-means-clustering/
-How to build an amazing music recommendation system.
-
-https://towardsdatascience.com/how-to-build-an-amazing-music-recommendation-system-4cce2719a572
-
-Build a Spotify-Like Music Recommender System in Python
-https://www.youtube.com/watch?v=gaZKjAKfe0s
+* Dynamic clustering algorithms like DBSCAN, this has the potential to recommend a more natural groupings of songs
+* Develop a mechanism for users to give feedback to rate their recommendations, and this should allow the model to refine its predictions over time and be adaptive to the current musical taste of the user population
+* Incorporate more features, and try encoding schemas beyond frequency encoding
