@@ -72,7 +72,7 @@ The model can be found [here](https://github.com/2s2e/cse151a-project/blob/main/
 ## 3. Evaluate your model compare training vs test error
 
 
-## We notice that the WCSS for the testing data, approx. 0.01, is considerably lower than our WCSS for our WCSS for our training data, which was approximately 0.09. 
+ We notice that the WCSS for the testing data, approx. 0.01, is considerably lower than our WCSS for our WCSS for our training data, which was approximately 0.09. 
 
 
 ## 4. Where does your model fit in the fitting graph, how does it compare to your first model?
