@@ -263,7 +263,6 @@ We performed hyper-parameter tuning on our DBSCAN model. This was done by GridSe
 
 ![image](https://github.com/2s2e/cse151a-project/assets/97645823/eadfec3c-4762-4f4a-ad03-7beb57df7a43)
 
-
 **Model 2 Fig 1. Histogram on Feature Distributions within Cluster 0**
 
 1. The 'Danceability' histogram shows a distribution with a concentration around the 0.7 to 0.8 range, suggesting that most tracks in this cluster are quite danceable.
@@ -351,6 +350,7 @@ The 'Loudness' axis displays less variability between clusters, with most cluste
 ### Model 2 Results
 
 ![image](https://github.com/2s2e/cse151a-project/assets/97645823/834d8180-4ece-4803-82df-92cfcf8d3591)
+
 **Model 2 Fig 1. Histogram on Feature Distributions within Cluster 1**
 'Danceability' in cluster 1 has a prominent peak, indicating a strong consistency in danceability among the tracks in this cluster, generally high.
 The 'Energy' feature shows a wide distribution, suggesting a diverse range of energy levels within the tracks of cluster 1.
