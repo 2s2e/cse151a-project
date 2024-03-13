@@ -352,6 +352,7 @@ The 'Loudness' axis displays less variability between clusters, with most cluste
 ![image](https://github.com/2s2e/cse151a-project/assets/97645823/834d8180-4ece-4803-82df-92cfcf8d3591)
 
 **Model 2 Fig 1. Histogram on Feature Distributions within Cluster 1**
+
 'Danceability' in cluster 1 has a prominent peak, indicating a strong consistency in danceability among the tracks in this cluster, generally high.
 The 'Energy' feature shows a wide distribution, suggesting a diverse range of energy levels within the tracks of cluster 1.
 'Loudness' appears to be normally distributed with a slight right skew, indicating varied loudness but with a tendency towards higher loudness levels.
