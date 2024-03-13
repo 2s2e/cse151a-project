@@ -5,6 +5,7 @@ To assess the quality of our clusters we used the WCSS (Within-Cluster Sum of Sq
 ### Model 1 Results
 
 ![image](https://github.com/2s2e/cse151a-project/assets/97645823/49cef2a6-0e13-4c20-9e16-ff9e14bc9264)
+
 **Model 1 Fig 2. Radar Chart of Feature Across Clusters**
 The radar chart provides a comparative visualization of the average values of five features—'Danceability', 'Energy', 'Loudness', 'Speechiness', and 'Acousticness'—across five different clusters identified within the dataset.
 'Danceability' and 'Energy' axes show that clusters tend to have moderate to high average values, suggesting these are prominent characteristics across clusters. Remarkably ‘Danceability’ is lowest for cluster 4 and relatively low for cluster 2.
