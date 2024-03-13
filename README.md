@@ -160,19 +160,12 @@ We have logarithmically scaled the data, which resulted in a normal distribution
 
 ### Model 1
 
-**= Silhouette =**
+![image](https://github.com/2s2e/cse151a-project/assets/97645823/bb76dd22-4002-4db7-abf5-9d65ed27c13f)
+
+**Model 1 Fig 1. Silhouette Analysis for Optimal Cluster Number Determination in KMeans Clustering**
 
 The silhouette plot shows the degree to which each object has been correctly classified using KMeans with 25 clusters during the clustering process. The silhouette coefficient, which gauges a sample's similarity to samples in its own cluster relative to samples in other clusters, is represented by each bar for a sample within a cluster. The coefficient ranges from -1 to 1,-+ where a high value indicates that the sample is well matched to its own cluster and poorly matched to neighboring clusters.
 
-
-**= Radar Chart =**
-
-The radar chart provides a comparative visualization of the average values of five features—'Danceability', 'Energy', 'Loudness', 'Speechiness', and 'Acousticness'—across five different clusters identified within the dataset.
-
-1. The clusters' moderate to high average values are indicated by the 'Danceability' and 'Energy' axes, indicating that they are common features amongst clusters. Remarkably, cluster 4 has the lowest "Danceability," but cluster 2 has a relatively low level.
-2. Less variation can be seen in the 'Loudness' axis between clusters; most clusters, with the exception of cluster 4, have average loudness levels that fall within the mid-range.
-3. All clusters' average values for "speechiness" are lower, suggesting that tracks with a high proportion of spoken words are less common.
-4. Clusters range greatly in terms of "acousticness," with some having lower average acousticness and others having higher average acousticness. This suggests that there are differences in the proportion of acoustic and electronic/synthetic sounds in the recordings.
 
 ```python=
 from sklearn.cluster import KMeans
@@ -268,20 +261,15 @@ Xtrain_with_clusters['cluster'] = kmeans.labels_
 We chose DBSCAN as our second model for clustering. To perform a cluster analysis, we used the numerical data of Danceability, Energy, Loudness, Speechiness, and Acousticness (which we are planning to accept as user input parameters in our application). We used the same data we trained our first model on in order to compare the performance of the two models and choose the best one for the next steps. Like for the last clustering algorithm, given the lack of labels to verify the grouping, we ended up using metrics dedicated for clustering algorithms evaluation, specifically silhouette score, and Within Cluster Sum of Squares, to assess model performance on training and test data.
 We performed hyper-parameter tuning on our DBSCAN model. This was done by GridSearch: we iteratively created models with different epsilon values and min_samples in certain range. We track the parameters that produce the clusters with the greatest silhouette score as our metric, suggesting the best fit clusters. As such we were able to choose a more optimized clustering model, which had a score of approximately 0.56, which is a considerable performance increase than other hyperparameter configurations that could go as low as 0.30.
 
-**= Histogram =**
+![image](https://github.com/2s2e/cse151a-project/assets/97645823/eadfec3c-4762-4f4a-ad03-7beb57df7a43)
+
+**Model 2 Fig 1. Histogram on Feature Distributions within Cluster 0**
+
 1. The 'Danceability' histogram shows a distribution with a concentration around the 0.7 to 0.8 range, suggesting that most tracks in this cluster are quite danceable.
 2. 'Energy' seems to be broadly distributed with multiple peaks indicating variability in the energy level, but with the majority of songs concentrated in the range of 0.7 - 0.9.
 3. 'Loudness' exhibits a peak around 0.875, implying that tracks in cluster 0 tend to be loud.
 4. 'Speechiness' shows a left-skewed distribution, with most tracks having lower speechiness values.
 5. The 'Acousticness' histogram is heavily left-skewed which reveals a preference for lower acousticness in this cluster.
-
-**= Histogram =**
-1. 'Danceability' in cluster 1 has a prominent peak at around 0.7, indicating generally high average danceability, which is, however, a bit lower than what we saw for cluster 0.
-2. The 'Energy' feature shows a wide distribution as well. However, we can see higher peaks at around 0.45-0.5, which again indicates lower average energy than cluster 0 has. 
-3. 'Loudness' appears to be normally distributed with a slight right skew, indicating varied loudness but with a tendency towards higher loudness levels which is similar to cluster 0.
-4. 'Speechiness' displays a distribution skewed to the left, similar to cluster 0, suggesting that speechiness is generally low in these tracks.
-5. The histogram for 'Acousticness' displays a high variability with the highest peak at around 0.575, generally showing higher acousticness score than songs in cluster 0.
-
 
 ```python=
 from sklearn.metrics import silhouette_score
