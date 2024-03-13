@@ -1,3 +1,343 @@
+# Introduction
+
+The purpose of our machine learning application is to allow the user to create very specific playlists that suit their needs. We aim to build a recommender system that first learns the user’s preferences and song associations and then allows them to provide a precise description of a playlist they’d like for the model to generate. For example, a user could ask for a playlist that contains a large amount of lyrics, starts slow, but has faster songs as the playlist progresses. We foresee the use of both unsupervised learning, for grouping similar songs, and supervised learning, for adjusting to the user’s preferences. 
+
+We were interested in this idea because we wanted to offer the users a different and more precise personalized experience. Unlike standard recommenders that generate playlists based on your recently played songs which often lack nuance and flexibility in their algorithm, our application empowers users to curate playlists that resonate deeply with their unique tastes and moods. On top of that, our application also encourages users’ curiosity by allowing them to fine-tune the variables, thus allowing them to explore a wider range of music that they would not have discovered otherwise. Furthermore, by introducing users to a wider variety of music, our application can promote diversity within the music industry and support lesser-known artists by exposing their work to new audiences. 
+
+
+# Method
+### Data Exploration
+```
+df_HU = df[df['Artist'] == 'Hollywood Undead']
+num_cols = ["Danceability", "Energy", "Loudness", "Speechiness", "Acousticness",
+            "Instrumentalness", "Liveness", "Valence", "Tempo", "Duration_ms",
+            "Views", "Likes", "Comments", "Stream"]
+df_HU_num = df_HU[num_cols]
+plt.figure(figsize=(10, 8))
+sns.heatmap(df_HU_num.corr(), vmin=-1, vmax=1, center= 0, linewidth=2, fmt='.2g',
+            cmap= 'coolwarm', annot=True)
+plt.show()
+```
+![image](https://github.com/2s2e/cse151a-project/assets/97645823/74fc0c0b-a43b-4b42-98b4-4d1405668bed)
+
+**Data Exploration Fig 1. Correlation Heatmap of Musical Features**
+
+1. There is a somewhat substantial positive correlation between "danceability" and "valence," indicating that songs that are deemed more danceable are typically linked to upbeat or joyful music.
+2. There is a strong positive link between "energy" and "loudness," which supports the idea that louder music is frequently interpreted as being more lively.
+3. "Acousticness" and "Energy" have a substantial negative association, suggesting that songs with more acoustic material are typically less energetic.
+4. There is a high correlation between "Stream," "Likes," "Views," and "Comments," indicating that popular music typically do well across these measures.
+5. There is a negative link between "Duration_ms" and "Danceability," "Energy," and "Valence," suggesting that danceable and energetic tunes are better off with shorter songs.
+
+
+![image](https://github.com/2s2e/cse151a-project/assets/97645823/cdc6b64e-87c3-4efa-8ec8-be69cd02a07c)
+
+```
+logarithmic_categories = ["Duration_ms", "Views", "Likes", "Comments", "Stream"]
+
+# Calculate the number of rows and columns for the subplot grid
+n_cols = 3
+n_rows = len(logarithmic_categories) // n_cols + (1 if len(logarithmic_categories) % n_cols > 0 else 0)
+
+# Create a figure and a grid of subplots
+fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=(19, 10))
+axs = axs.flatten()
+
+for idx, column in enumerate(logarithmic_categories):
+    # Apply a logarithmic transformation with a small shift to handle zero values
+    logarithmic_data = np.log(df[column] + 1)
+    axs[idx].hist(logarithmic_data, bins=50, color='blue', alpha=0.7)
+    axs[idx].set_title(column)
+    axs[idx].set_xlabel('Logarithmic Scale')
+    axs[idx].set_ylabel('Frequency')
+
+# Hide any empty subplots
+for ax in axs[len(logarithmic_categories):]:
+    ax.set_visible(False)
+
+plt.tight_layout()
+plt.show()
+```
+
+**Data Exploration Fig 2. Histograms for Log-Transformed Music Track Features**
+
+This is a collection of histograms to display the frequency distributions of five key features from a music track dataset—'Duration_ms', 'Views', 'Likes', 'Comments', and 'Stream' after applying a logarithmic transformation to each. 
+
+Most of them show standard deviation, 'Views' and 'Likes' are slightly skewed to the right.
+
+![image](https://github.com/2s2e/cse151a-project/assets/97645823/f3e5d24e-a3dd-4ac3-b189-a8ab1a07a8b1)
+
+```
+df_only_categorical['Album_type'].value_counts()
+
+fig = plt.figure(figsize=(10, 7))
+df_only_categorical['Album_type'].value_counts().plot(kind='pie', autopct='%0.1f%%',shadow=True,explode=(0.1,0.1,0.1),wedgeprops={'linewidth':2,'edgecolor':'black'})
+
+plt.show()
+```
+
+**Data Exploration Fig 3. Pie Chart Distribution of Album Types in Music Dataset**
+
+Distribution of album types to observe what kind of albums will be analyzed within the dataset.  We observe large proportion of album as a type, while singles follow, and a sliver of compilations.
+
+The percentage of each album type—album, single, and compilation—in a music dataset is shown in a pie chart. With albums making up the greatest portion of the dataset (72% of the total), it is likely that typical full-length albums make up the majority of the dataset. Singles make up 24.2% of the population, a substantial but relatively tiny representation. With only 3.8% of the dataset, compilations are the least common type of data. 
+
+##     Preprocessing
+
+We first dropped irrelevant features such as Spotify/Youtube URLs, Channel, whether or not they are Licensed, and whether or not they are official video.
+
+```
+def drop_irrelevant_cols(df, irrelevant_columns):
+
+    input_num_cols = df.shape[1]
+    print(f"The original dataset has {input_num_cols} columns", end = "\n\n")
+
+    df = df.drop(columns=irrelevant_columns)
+    print(f"{len(irrelevant_columns)} columns were successfully dropped from the dataframe!")
+    print(irrelevant_columns, end = "\n\n")
+
+    output_num_cols = df.shape[1]
+    print(f"The final dataset has {output_num_cols} columns", end = "\n\n")
+
+    return df
+```
+
+```
+irrelevant_columns = ['Url_youtube', 'Url_spotify', 'Uri', 'Unnamed: 0', 'Channel', 'Licensed', 'official_video']
+df = drop_irrelevant_cols(df, irrelevant_columns)
+df.head()
+```
+
+We first dropped irrelevant features such as Spotify/Youtube URLs, Channel, whether or not they are Licensed, and whether or not they are official videos.
+
+![image](https://github.com/2s2e/cse151a-project/assets/97645823/57d596bd-06ab-4065-b3f4-0fb52c9af2d5)
+
+Then we dropped the rows that have null values.
+
+```
+def drop_null_values(df):
+
+    initial_num_rows = df.shape[0]
+    print(f"Number of rows in the dataframe before dropping nulls: {initial_num_rows}", end = "\n\n")
+
+    df.dropna(inplace=True)
+    print(f"Null values were dropped from the dataframe!", end = "\n\n")
+
+    output_num_rows = df.shape[0]
+    print(f"Number of rows in the dataframe after dropping nulls: {output_num_rows}", end = "\n\n")
+
+    return df
+```
+
+![image](https://github.com/2s2e/cse151a-project/assets/97645823/790ebed1-fd67-4ab3-9ce6-6e16e9ace018)
+
+
+Then we one-hot encoded the Key of the Song and Album Type (Single, Album, Compilation). 
+
+```
+def oneHotEncodeFeatures(df, feature_list):
+
+    print("Features we are encoding:")
+    print(feature_list, end = "\n\n")
+    encoder = OneHotEncoder()
+
+    print(f"Number of columns before one hot encoding {df.shape[1]}", end = "\n\n")
+
+    encoded_df = pd.DataFrame(encoder.fit_transform(df[feature_list]).toarray())
+    print("One hot encoding completed!", end = "\n\n")
+
+    df.drop(columns=feature_list)
+
+    df = df.join(encoded_df)
+
+    print(f"Number of columns before one hot encoding {df.shape[1]}", end = "\n\n")
+
+    return df
+```
+
+We have logarithmically scaled the data, which resulted in a normal distribution, and then normalized the data to be between 0 and 1. Strings, such as artist name and album name were encoded based on the total number of views associated with that artist or album. 
+
+![image](https://github.com/2s2e/cse151a-project/assets/97645823/5e3c90f1-fad3-4258-bc6a-c23391d2bdf6)
+
+## Model 1
+
+**= Silhouette =**
+
+The silhouette plot shows the degree to which each object has been correctly classified using KMeans with 25 clusters during the clustering process. The silhouette coefficient, which gauges a sample's similarity to samples in its own cluster relative to samples in other clusters, is represented by each bar for a sample within a cluster. The coefficient ranges from -1 to 1,-+ where a high value indicates that the sample is well matched to its own cluster and poorly matched to neighboring clusters.
+
+
+**= Radar Chart =**
+
+The radar chart provides a comparative visualization of the average values of five features—'Danceability', 'Energy', 'Loudness', 'Speechiness', and 'Acousticness'—across five different clusters identified within the dataset.
+
+1. The clusters' moderate to high average values are indicated by the 'Danceability' and 'Energy' axes, indicating that they are common features amongst clusters. Remarkably, cluster 4 has the lowest "Danceability," but cluster 2 has a relatively low level.
+2. Less variation can be seen in the 'Loudness' axis between clusters; most clusters, with the exception of cluster 4, have average loudness levels that fall within the mid-range.
+3. All clusters' average values for "speechiness" are lower, suggesting that tracks with a high proportion of spoken words are less common.
+4. Clusters range greatly in terms of "acousticness," with some having lower average acousticness and others having higher average acousticness. This suggests that there are differences in the proportion of acoustic and electronic/synthetic sounds in the recordings.
+
+```python=
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_samples, silhouette_score
+import matplotlib.cm as cm
+
+for n_clusters in range(5, 30, 5):
+    # Create a subplot with 1 row and 2 columns
+    fig, ax1 = plt.subplots(1, 1)
+    fig.set_size_inches(5, 10)
+
+    # The 1st subplot is the silhouette plot
+    # The silhouette coefficient can range from -1, 1 but in this example all
+    # lie within [-0.1, 1]
+    ax1.set_xlim([-0.1, 1])
+    # The (n_clusters+1)*10 is for inserting blank space between silhouette
+    # plots of individual clusters, to demarcate them clearly.
+    ax1.set_ylim([0, len(Xtrain_k) + (n_clusters + 1) * 10])
+
+    # Initialize the clusterer with n_clusters value and a random generator
+    # seed of 10 for reproducibility.
+    clusterer = KMeans(n_clusters=n_clusters, n_init='auto' ,random_state=10)
+    cluster_labels = clusterer.fit_predict(Xtrain_k)
+
+    # The silhouette_score gives the average value for all the samples.
+    # This gives a perspective into the density and separation of the formed
+    # clusters
+    silhouette_avg = silhouette_score(Xtrain_k, cluster_labels)
+    print(
+        "For n_clusters =",
+        n_clusters,
+        "The average silhouette_score is :",
+        silhouette_avg,
+    )
+
+    # Compute the silhouette scores for each sample
+    sample_silhouette_values = silhouette_samples(Xtrain_k, cluster_labels)
+
+    y_lower = 10
+    for i in range(n_clusters):
+        # Aggregate the silhouette scores for samples belonging to
+        # cluster i, and sort them
+        ith_cluster_silhouette_values = sample_silhouette_values[cluster_labels == i]
+
+        ith_cluster_silhouette_values.sort()
+
+        size_cluster_i = ith_cluster_silhouette_values.shape[0]
+        y_upper = y_lower + size_cluster_i
+
+        color = cm.nipy_spectral(float(i) / n_clusters)
+        ax1.fill_betweenx(
+            np.arange(y_lower, y_upper),
+            0,
+            ith_cluster_silhouette_values,
+            facecolor=color,
+            edgecolor=color,
+            alpha=0.7,
+        )
+
+        # Label the silhouette plots with their cluster numbers at the middle
+        ax1.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
+
+        # Compute the new y_lower for next plot
+        y_lower = y_upper + 10  # 10 for the 0 samples
+
+    ax1.set_title("The silhouette plot for the various clusters.")
+    ax1.set_xlabel("The silhouette coefficient values")
+    ax1.set_ylabel("Cluster label")
+
+    # The vertical line for average silhouette score of all the values
+    ax1.axvline(x=silhouette_avg, color="red", linestyle="--")
+
+    ax1.set_yticks([])  # Clear the yaxis labels / ticks
+    ax1.set_xticks([-0.1, 0, 0.2, 0.4, 0.6, 0.8, 1])
+
+
+    plt.suptitle(
+        "Silhouette analysis for KMeans clustering on sample data with n_clusters = %d"
+        % n_clusters,
+        fontsize=14,
+        fontweight="bold",
+    )
+
+
+n_clusters = 20
+kmeans = KMeans(n_clusters=n_clusters, random_state=0, n_init="auto").fit(Xtrain_k)
+Xtrain_with_clusters = Xtrain_k
+Xtrain_with_clusters['cluster'] = kmeans.labels_
+```
+
+## Model 2
+
+We chose DBSCAN as our second model for clustering. To perform a cluster analysis, we used the numerical data of Danceability, Energy, Loudness, Speechiness, and Acousticness (which we are planning to accept as user input parameters in our application). We used the same data we trained our first model on in order to compare the performance of the two models and choose the best one for the next steps. Like for the last clustering algorithm, given the lack of labels to verify the grouping, we ended up using metrics dedicated for clustering algorithms evaluation, specifically silhouette score, and Within Cluster Sum of Squares, to assess model performance on training and test data.
+We performed hyper-parameter tuning on our DBSCAN model. This was done by GridSearch: we iteratively created models with different epsilon values and min_samples in certain range. We track the parameters that produce the clusters with the greatest silhouette score as our metric, suggesting the best fit clusters. As such we were able to choose a more optimized clustering model, which had a score of approximately 0.56, which is a considerable performance increase than other hyperparameter configurations that could go as low as 0.30.
+
+**= Histogram =**
+1. The 'Danceability' histogram shows a distribution with a concentration around the 0.7 to 0.8 range, suggesting that most tracks in this cluster are quite danceable.
+2. 'Energy' seems to be broadly distributed with multiple peaks indicating variability in the energy level, but with the majority of songs concentrated in the range of 0.7 - 0.9.
+3. 'Loudness' exhibits a peak around 0.875, implying that tracks in cluster 0 tend to be loud.
+4. 'Speechiness' shows a left-skewed distribution, with most tracks having lower speechiness values.
+5. The 'Acousticness' histogram is heavily left-skewed which reveals a preference for lower acousticness in this cluster.
+
+**= Histogram =**
+1. 'Danceability' in cluster 1 has a prominent peak at around 0.7, indicating generally high average danceability, which is, however, a bit lower than what we saw for cluster 0.
+2. The 'Energy' feature shows a wide distribution as well. However, we can see higher peaks at around 0.45-0.5, which again indicates lower average energy than cluster 0 has. 
+3. 'Loudness' appears to be normally distributed with a slight right skew, indicating varied loudness but with a tendency towards higher loudness levels which is similar to cluster 0.
+4. 'Speechiness' displays a distribution skewed to the left, similar to cluster 0, suggesting that speechiness is generally low in these tracks.
+5. The histogram for 'Acousticness' displays a high variability with the highest peak at around 0.575, generally showing higher acousticness score than songs in cluster 0.
+
+
+```python=
+from sklearn.metrics import silhouette_score
+
+# Iteratively search through hyperparameters epsilon and min samples
+for i in range(MIN_SAMPLES_START, MIN_SAMPLES_END + 1, SAMPLE_STEP):
+    for j in EPS_VALUES:
+        clustering = DBSCAN(eps=j, min_samples=i).fit(Xtrain)
+        Xtrain['cluster'] = clustering.labels_
+        Xtrain['cluster'].value_counts()
+
+        # Evaluate the clusters via silhouette score
+        score = silhouette_score(Xtrain.drop(columns=['cluster']), Xtrain['cluster'])
+        print("Silhouette Score for eps = " + str(j) + ", min_samples = " + str(i) + ": " + str(score))
+
+        # If these hyperparameters produce a better score than we last checked for, save it!
+        if abs(score) > best_score:
+            best_score = abs(score)
+
+            # Save hyperparameters
+            best_eps = j
+            best_min_samples = i
+
+            print("New optimal hyperparameters found!")
+
+# fit returns a fitted instance of self
+model = DBSCAN(eps=best_eps, min_samples=best_min_samples)
+clustering = model.fit(Xtrain)
+# we will now assign the clusters corresponding to the best set of hyperparameters found
+Xtrain['cluster'] = clustering.labels_
+```
+
+## Model 3
+
+```python=
+def knn_predict(k, clustered_data, clusters, data_to_be_classified):
+    """
+
+        Parameters:
+            1) k: number of neighbors
+            2) clustered_data: data for which clusters are known
+            3) clusters: clusters associated with each row of clustered_data
+            4) data_to_be_classified: data for which we need to obtain the clusters
+    """
+    neigh = KNeighborsClassifier(n_neighbors=k)
+    neigh.fit(clustered_data, clusters)
+    yhat = neigh.predict(data_to_be_classified)
+    return yhat
+```
+
+**= WCSS =**
+1. From the graph we can make the observation that the WSCC score gets lower as we increased the score we choose for K, but we are seeing a spike as we approach K values greater than 80. We can reason and conclude from the graph that the K value of 60 is optimal.
+**= WCSS =**
+1. We can see a spike up in WSCC value when our choice of K increased from 0 to 20, and the WCSS score plateaued as K increased from 20 to 70. Finally WCSS score started rising as K approaches 80. However, it's worth noting that the variations in terms of their WCSS values is almost negligible. 
+
+
 # Results
 
 To assess the quality of our clusters we used the WCSS (Within-Cluster Sum of Square) evalutation metric
