@@ -81,7 +81,7 @@ Distribution of album types to observe what kind of albums will be analyzed with
 
 The percentage of each album type—album, single, and compilation—in a music dataset is shown in a pie chart. With albums making up the greatest portion of the dataset (72% of the total), it is likely that typical full-length albums make up the majority of the dataset. Singles make up 24.2% of the population, a substantial but relatively tiny representation. With only 3.8% of the dataset, compilations are the least common type of data. 
 
-##     Preprocessing
+###    Preprocessing
 
 We first dropped irrelevant features such as Spotify/Youtube URLs, Channel, whether or not they are Licensed, and whether or not they are official video.
 
@@ -158,7 +158,7 @@ We have logarithmically scaled the data, which resulted in a normal distribution
 
 ![image](https://github.com/2s2e/cse151a-project/assets/97645823/5e3c90f1-fad3-4258-bc6a-c23391d2bdf6)
 
-## Model 1
+### Model 1
 
 **= Silhouette =**
 
@@ -263,7 +263,7 @@ Xtrain_with_clusters = Xtrain_k
 Xtrain_with_clusters['cluster'] = kmeans.labels_
 ```
 
-## Model 2
+### Model 2
 
 We chose DBSCAN as our second model for clustering. To perform a cluster analysis, we used the numerical data of Danceability, Energy, Loudness, Speechiness, and Acousticness (which we are planning to accept as user input parameters in our application). We used the same data we trained our first model on in order to compare the performance of the two models and choose the best one for the next steps. Like for the last clustering algorithm, given the lack of labels to verify the grouping, we ended up using metrics dedicated for clustering algorithms evaluation, specifically silhouette score, and Within Cluster Sum of Squares, to assess model performance on training and test data.
 We performed hyper-parameter tuning on our DBSCAN model. This was done by GridSearch: we iteratively created models with different epsilon values and min_samples in certain range. We track the parameters that produce the clusters with the greatest silhouette score as our metric, suggesting the best fit clusters. As such we were able to choose a more optimized clustering model, which had a score of approximately 0.56, which is a considerable performance increase than other hyperparameter configurations that could go as low as 0.30.
@@ -314,7 +314,7 @@ clustering = model.fit(Xtrain)
 Xtrain['cluster'] = clustering.labels_
 ```
 
-## Model 3
+### Model 3
 
 ```python=
 def knn_predict(k, clustered_data, clusters, data_to_be_classified):
