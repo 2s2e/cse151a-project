@@ -320,11 +320,42 @@ def knn_predict(k, clustered_data, clusters, data_to_be_classified):
     return yhat
 ```
 
-**= WCSS =**
-1. From the graph we can make the observation that the WSCC score gets lower as we increased the score we choose for K, but we are seeing a spike as we approach K values greater than 80. We can reason and conclude from the graph that the K value of 60 is optimal.
-**= WCSS =**
-1. We can see a spike up in WSCC value when our choice of K increased from 0 to 20, and the WCSS score plateaued as K increased from 20 to 70. Finally WCSS score started rising as K approaches 80. However, it's worth noting that the variations in terms of their WCSS values is almost negligible. 
+We use KNN based on the clusters we developed in Model 1 to run a KNN, using WCSS to evalute the model.
 
+```
+# We will iterate through different values of k for KNN can affect the WCSS.
+history_test = []
+history_train = []
+
+for k_val in range(1, 100, 10):
+  # Testing data evaluation of WCSS
+  test_cluster_labels = knn_predict(k = k_val, clustered_data = Xtrain_k.drop(columns=['cluster']), clusters = Xtrain_k['cluster'], data_to_be_classified = X_test_k)
+
+  wcss_test = 0
+  for i in range (n_clusters):
+    center = kmeans.cluster_centers_[i]
+    test_labels = X_test_k[test_cluster_labels == i]
+    wcss_test += np.sum((test_labels - center)**2)
+
+  wcss_test = np.sum(wcss_test)
+
+  print("Test WCSS for k = " + str(k_val) + ": " +  str(wcss_test / len(X_test_k)))
+  history_test.append(wcss_test/len(X_test_k))
+
+  # Training data evaluation of WCSS
+  train_cluster_labels = knn_predict(k = k_val, clustered_data = Xtrain_k.drop(columns=['cluster']), clusters = Xtrain_k['cluster'], data_to_be_classified = Xtrain_k.drop(columns=['cluster']))
+
+  wcss_train = 0
+  for i in range (n_clusters):
+      center = kmeans.cluster_centers_[i]
+      train_labels = Xtrain_k[train_cluster_labels == i].drop(columns=['cluster'])
+      wcss_train += np.sum((train_labels - center)**2)
+
+  wcss_train = np.sum(wcss_train)
+  history_train.append(wcss_train/len(Xtrain_k))
+
+  print("Train WCSS for k = " + str(k_val) + ": " + str(wcss_train / len(Xtrain_k)))
+```
 
 # Results
 
